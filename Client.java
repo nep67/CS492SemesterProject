@@ -64,17 +64,18 @@ public class Client
 					*/
 
 					
-                    /*
+                    
 					while(!authorized){
 						
                         
 						try {
-							dos.writeUTF(yourname + "#" + theirname);
+							dos.writeUTF("" + yourname + "#" + theirname);
+							authorized = true;
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 						
-					}*/
+					}
                      
 					// read the message to deliver.
 					String msg = scn.nextLine();
@@ -99,20 +100,21 @@ public class Client
 
 				while (true) {
 
-                   /*
+                   
 					while(!authorized){
 
 						try {
 							// read the message sent to this client
 							String sender = dis.readUTF();
-							System.out.println(sender);
-							authorized = true;
+							System.out.println(sender + "Is Authorized");
+							
+	
 						} catch (IOException e) {
 
 							e.printStackTrace();
 						}
 					
-					} */
+					} 
 
 					
 					try {
