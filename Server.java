@@ -9,6 +9,10 @@ import java.net.*;
 // Server class
 public class Server
 {
+	static boolean authorized = false;
+	static boolean signIn = true;
+	static String username;
+	static String step;
 
 	// Vector to store active clients
 	static Vector<ClientHandler> ar = new Vector<>();
@@ -37,12 +41,17 @@ public class Server
 			DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 			
 			// holds username for ClientHandler array when client logs on
-			String username = dis.readUTF();
+			
+			
+				username = dis.readUTF();
+				step = "";
+			
+			
 			System.out.println("Creating a new handler for this client...");
 
 			// Create a new handler object for handling this request.
 			ClientHandler mtch = new ClientHandler(s,username, dis, dos);
-
+			
 			// Create a new Thread with this object.
 			Thread t = new Thread(mtch);
 
@@ -53,7 +62,8 @@ public class Server
 
 			// start the thread.
 			t.start();
-
+			
+            
 			// increment i for new client.
 			// i is used for naming only, and can be replaced
 			// by any naming scheme
@@ -72,6 +82,7 @@ class ClientHandler implements Runnable
 	final DataOutputStream dos;
 	Socket s;
 	boolean isloggedin;
+	boolean isauthorized;
 
 	// constructor
 	public ClientHandler(Socket s, String name,
@@ -81,6 +92,7 @@ class ClientHandler implements Runnable
 		this.name = name;
 		this.s = s;
 		this.isloggedin=true;
+		this.isauthorized=false;
 	}
 
 	@Override
@@ -105,20 +117,36 @@ class ClientHandler implements Runnable
 				// break the string into message and recipient part
 				StringTokenizer st = new StringTokenizer(received, "#");
                 String MsgToSend = st.nextToken();
-                String recipient = st.nextToken();
+				String recipient = st.nextToken();
+				String handshake = st.nextToken();
 
 				// search for the recipient in the connected devices list.
 				// ar is the vector storing client of active users
-				for (ClientHandler mc : Server.ar)
-				{
-					// if the recipient is found, write on its
-					// output stream
-					if (mc.name.equals(recipient) && mc.isloggedin==true)
+				if(handshake.equals("step1")){
+					
+					for (ClientHandler mc : Server.ar)
 					{
-						mc.dos.writeUTF(this.name+" : "+MsgToSend);
-						break;
+						// if the recipient is found, write on its
+						// output stream
+						if (mc.name.equals(recipient) && mc.isloggedin==true){
+							
+							handshake = "step2";
+							mc.dos.writeUTF(MsgToSend+"#"+handshake);
+							break;
+						}
 					}
-				}
+			   }else{
+					for (ClientHandler mc : Server.ar)
+					{
+						// if the recipient is found, write on its
+						// output stream
+						if (mc.name.equals(recipient) && mc.isloggedin==true)
+						{
+							mc.dos.writeUTF(this.name+" : "+MsgToSend);
+							break;
+						}
+					}
+			   }
 			} catch (IOException e) {
 
 				e.printStackTrace();
